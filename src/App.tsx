@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Title from "./components/Title";
 import Form from "./components/Form";
 import Results from "./components/Results";
+import Loading from "./components/Loading";
 import "./App.css";
 
 type ResultsStateType = {
@@ -13,6 +14,7 @@ type ResultsStateType = {
 };
 
 function App() {
+  const [loading, setLoading] = useState<boolean>(false);
   const [city, setCity] = useState<string>("");
   const [results, setResults] = useState<ResultsStateType>({
     country: "",
@@ -23,6 +25,7 @@ function App() {
   });
   const getWeather = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
     //   fetchはAPIコールと呼ばれる
     // .thenでAPIにデータを送った後の処理 resはresponseの略でAPIから送り返された気象データが入っている
     fetch(
@@ -39,14 +42,21 @@ function App() {
           conditionText: data.current.condition.text,
           icon: data.current.condition.icon,
         });
-      });
+        setCity("");
+        setLoading(false);
+      })
+      .catch((err) =>
+        alert(
+          "エラーが発生しました。ページをリロードしてもう一度トライしてください。"
+        )
+      );
   };
   return (
     <div className="wrapper">
       <div className="container">
         <Title />
-        <Form setCity={setCity} getWeather={getWeather} />
-        <Results results={results} />
+        <Form city={city} setCity={setCity} getWeather={getWeather} />
+        {loading ? <Loading /> : <Results results={results} />}
       </div>
     </div>
   );
